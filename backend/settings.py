@@ -32,8 +32,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
-    "rest_framework",
+    "rest_framework",    
     "todo",
+    "authentication",
 ]
 
 MIDDLEWARE = [
@@ -123,6 +124,19 @@ if not DEBUG:
     ]
 else:
     CORS_ORIGIN_WHITELIST = ["http://localhost:3000"]
+    
+# This setting is required to allow the frontend to send cookies
+# with the requests
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+# JWT settings
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 
 STATIC_URL = "static/"    
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
