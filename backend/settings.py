@@ -118,9 +118,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 # Update CORS for production
+CORS_ALLOW_CREDENTIALS = True
+
 if not DEBUG:
-    CORS_ALLOWED_ORIGINS = [
-        os.getenv("FRONTEND_URL", "http://localhost:3000"),
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    CORS_ALLOWED_ORIGINS = [frontend_url]
+    CSRF_TRUSTED_ORIGINS = [
+        frontend_url,
+        f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME', '')}",
     ]
 else:
     CORS_ALLOWED_ORIGINS = [
@@ -128,9 +133,7 @@ else:
         "http://localhost:5173",
         "http://127.0.0.1:5173",
     ]
-
-CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://localhost:5173"]
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://localhost:5173"]
     
 # This setting is required to allow the frontend to send cookies
 # with the requests
