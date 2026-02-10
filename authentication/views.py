@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import generics
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
@@ -13,6 +13,7 @@ from .serializers import (
     RegisterSerializer,
     PasswordResetSerializer,
     PasswordResetConfirmSerializer,
+    ProfileSerializer,
 )
 
 
@@ -115,3 +116,28 @@ class PasswordResetConfirmView(APIView):
         return Response(
             {"message": "Password reset successful"}, status=status.HTTP_200_OK
         )
+
+
+class ProfileView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        from .models import Profile
+
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        serializer = ProfileSerializer(profile, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        from .models import Profile
+
+        profile, _ = Profile.objects.get_or_create(user=request.user)
+        serializer = ProfileSerializer(
+            profile,
+            data=request.data,
+            partial=True,
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)

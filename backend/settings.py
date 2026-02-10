@@ -15,6 +15,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
 
+DEFAULT_PROFILE_IMAGE_URL = os.getenv("DEFAULT_PROFILE_IMAGE_URL", "")
+
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
