@@ -19,6 +19,13 @@ The easiest way to test the API is using the **interactive Swagger documentation
 
 Swagger provides a user-friendly interface to test all endpoints directly in your browser. You can also use tools like Postman or cURL if you prefer.
 
+### Frontend Repository
+
+The frontend React application is available at:
+**https://github.com/anandveeraswamy/moz-todo-react**
+
+Frontend deployment: https://moz-todo-react.onrender.com
+
 ## 📋 Features
 
 ### Authentication
@@ -116,7 +123,7 @@ Create a `.env` file in the `django-todo-backend` directory:
 ```env
 DEBUG=True
 SECRET_KEY=your-secret-key-here
-FRONTEND_URL=http://localhost:5173
+FRONTEND_URL=http://localhost:3000
 DEFAULT_PROFILE_IMAGE_URL=https://via.placeholder.com/150
 
 # Optional - for password reset emails
