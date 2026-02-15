@@ -7,7 +7,7 @@ A RESTful API built with Django and Django REST Framework for a todo application
 ## 🚀 Live Demo
 
 The backend is deployed on Render and accessible at:
-**https://django-backend-aqrl.onrender.com**
+**https://django-backend-aqrl.onrender.com/api**
 
 ⚠️ **Important:** The free tier on Render spins down after inactivity. The first request may take up to **1 minute** to start up. Please be patient!
 
