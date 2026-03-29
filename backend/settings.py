@@ -135,8 +135,13 @@ else:
         "http://localhost:3000",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "https://cautious-space-memory-x5pv75v5v9pvcwq9-3000.app.github.dev",
     ]
-    CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", "http://localhost:5173"]
+    CSRF_TRUSTED_ORIGINS = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://cautious-space-memory-x5pv75v5v9pvcwq9-3000.app.github.dev",
+    ]
     
 # This setting is required to allow the frontend to send cookies
 # with the requests
