@@ -131,12 +131,13 @@ if not DEBUG:
         f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME', '')}",
     ]
 else:
-    CORS_ALLOWED_ORIGINS = [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://cautious-space-memory-x5pv75v5v9pvcwq9-3000.app.github.dev",
-    ]
+    CORS_ALLOWED_ORIGINS = True
+    # [
+        # "http://localhost:3000",
+        # "http://localhost:5173",
+        # "http://127.0.0.1:5173",
+        # "https://cautious-space-memory-x5pv75v5v9pvcwq9-3000.app.github.dev",
+    #]
     CSRF_TRUSTED_ORIGINS = [
         "http://localhost:3000",
         "http://localhost:5173",
