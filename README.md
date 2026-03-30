@@ -1,351 +1,223 @@
-# Django Todo Backend API
-
-A RESTful API built with Django and Django REST Framework for a todo application with JWT authentication. This is an ongoing project demonstrating how to set up a full-stack application with authentication and CRUD operations.
-
-> **Note:** This is a learning project and an example for students. It demonstrates best practices for setting up Django backends with authentication, but is not meant to be production-perfect code.
-
-## 🚀 Live Demo
-
-The backend is deployed on Render and accessible at:
-**https://django-backend-aqrl.onrender.com/api**
-
-⚠️ **Important:** The free tier on Render spins down after inactivity. The first request may take up to **1 minute** to start up. Please be patient!
-
-### Testing the Live API
-
-The easiest way to test the API is using the **interactive Swagger documentation**:
-
-👉 **Visit:** https://django-backend-aqrl.onrender.com/api/docs/
-
-Swagger provides a user-friendly interface to test all endpoints directly in your browser. You can also use tools like Postman or cURL if you prefer.
-
-### Frontend Repository
-
-The frontend React application is available at:
-**https://github.com/anandveeraswamy/moz-todo-react**
-
-Frontend deployment: https://moz-todo-react.onrender.com
-
-## 📋 Features
-
+# Inventory Management System — Backend API
+ 
+A RESTful API built with Django and Django REST Framework for managing inventory items. Supports JWT authentication, full CRUD operations, stock level monitoring with low-stock alerts, a stock adjustment audit log, email-based password reset via SendGrid, and user profile management with Cloudinary image uploads.
+ 
+This is the backend (middleware + database layer) for the Inventory Management System, built as part of the Enterprise Software Engineering module.
+ 
+## Live Demo
+ 
+- **API Base:** https://inventory-backend-2775.onrender.com/api
+- **Swagger Docs:** https://inventory-backend-2775.onrender.com/api/docs/
+- **Frontend:** https://inventory-frontend-i2y1.onrender.com
+ 
+> **Note:** The backend runs on Render's free tier, so the first request after inactivity may take up to 60 seconds while the server wakes up.
+ 
+## Features
+ 
 ### Authentication
-- **User Registration** - Create new user accounts
-- **JWT Authentication** - Secure token-based authentication
-- **Login/Logout** - Session management with access and refresh tokens
-- **Password Reset** - Email-based password reset flow (via SendGrid)
-- **User Profile** - View and update user profile with Cloudinary image uploads
-
-### Todo CRUD Operations
-- **Create** - Add new todos
-- **Read** - List all todos for authenticated user
-- **Update** - Mark todos as complete/incomplete, edit todo text
-- **Delete** - Remove todos
-- **Filter** - Todos are user-specific (each user sees only their todos)
-
+- User registration with email validation
+- JWT-based login (access + refresh tokens)
+- Password reset via SendGrid email
+- User profile management (email, profile image via Cloudinary)
+ 
+### Inventory Management (CRUD)
+- Create, read, update, and delete inventory items
+- Items are scoped to the authenticated user (user isolation)
+- Category system (Electronics, Clothing, Food, Office, Other)
+- Low stock threshold per item with computed `is_low_stock` field
+- Server-side validation (no negative quantities or thresholds)
+ 
+### Stock Adjustment Audit Log
+- Every quantity change is automatically recorded
+- Tracks old quantity, new quantity, reason, timestamp, and user
+- Accessible via `/api/items/{id}/history/` endpoint
+- Reasons are categorised: created, increase, decrease, edit
+- Visible in Django admin for oversight
+ 
 ### API Documentation
-- **Swagger UI** - Interactive API documentation at `/api/docs/`
-- **OpenAPI Schema** - Machine-readable schema at `/api/schema/`
-
-## 🛠️ Tech Stack
-
-- **Django 6.0.2** - Python web framework
-- **Django REST Framework** - API toolkit
-- **Simple JWT** - JWT authentication
-- **PostgreSQL** - Production database (via Render)
-- **SQLite** - Local development database
-- **SendGrid** - Email service for password resets
-- **Cloudinary** - Image hosting for profile pictures
-- **drf-spectacular** - OpenAPI schema generation
-- **CORS Headers** - Cross-origin resource sharing
-
-## 📁 Project Structure
-
+- Swagger UI at `/api/docs/`
+- OpenAPI schema at `/api/schema/`
+ 
+## Tech Stack
+ 
+- **Python 3.12**
+- **Django 6.0.2**
+- **Django REST Framework 3.16.1**
+- **Simple JWT** — token-based authentication
+- **PostgreSQL** — production database (via Render)
+- **SQLite** — local development database
+- **SendGrid** — email delivery for password resets
+- **Cloudinary** — profile image hosting
+- **drf-spectacular** — OpenAPI/Swagger documentation
+- **WhiteNoise** — static file serving
+- **Gunicorn** — production WSGI server
+ 
+## Project Structure
+ 
 ```
-django-todo-backend/
-├── authentication/           # User authentication app
-│   ├── models.py            # PasswordResetToken, Profile models
-│   ├── serializers.py       # User, Profile serializers
-│   ├── views.py             # Auth endpoints
-│   └── urls.py              # Auth routes
+django-backend/
+├── authentication/          # User auth app
+│   ├── models.py           # PasswordResetToken, Profile models
+│   ├── serializers.py      # Register, Login, Profile, PasswordReset serializers
+│   ├── views.py            # Auth endpoints (register, login, reset, profile)
+│   ├── urls.py             # Auth URL routing
+│   └── tests.py            # Auth test suite
 ├── backend/                 # Project settings
-│   ├── settings.py          # Configuration
-│   ├── urls.py              # Main URL routing
-│   └── wsgi.py              # WSGI config for deployment
-├── todo/                    # Todo app
-│   ├── models.py            # Todo model
-│   ├── serializers.py       # Todo serializer
-│   ├── views.py             # Todo CRUD views
-│   └── admin.py             # Django admin configuration
-├── manage.py                # Django management script
-├── requirements.txt         # Python dependencies
-└── db.sqlite3              # Local SQLite database (gitignored)
+│   ├── settings.py         # Django configuration
+│   ├── urls.py             # Root URL routing with DRF router
+│   └── wsgi.py             # WSGI entry point
+├── todo/                    # Inventory app (kept as 'todo' from initial scaffold)
+│   ├── models.py           # InventoryItem, StockAdjustment models
+│   ├── serializers.py      # Item and StockAdjustment serializers
+│   ├── views.py            # ModelViewSet with audit logging
+│   ├── admin.py            # Django admin registration
+│   └── tests.py            # Inventory + audit log test suite
+├── manage.py
+└── requirements.txt
 ```
-
-## 🚀 Local Setup Instructions
-
+ 
+## API Endpoints
+ 
+### Authentication
+ 
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| POST | `/api/auth/register/` | Register new user | No |
+| POST | `/api/auth/token/` | Login (get JWT tokens) | No |
+| POST | `/api/auth/token/refresh/` | Refresh access token | No |
+| POST | `/api/auth/password-reset/` | Request password reset email | No |
+| POST | `/api/auth/password-reset-confirm/` | Confirm reset with token | No |
+| GET | `/api/auth/profile/` | Get user profile | Yes |
+| PATCH | `/api/auth/profile/` | Update user profile | Yes |
+ 
+### Inventory Items
+ 
+| Method | Endpoint | Description | Auth |
+|--------|----------|-------------|------|
+| GET | `/api/items/` | List all user's items | Yes |
+| POST | `/api/items/` | Create new item | Yes |
+| GET | `/api/items/{id}/` | Get specific item | Yes |
+| PUT | `/api/items/{id}/` | Full update item | Yes |
+| PATCH | `/api/items/{id}/` | Partial update item | Yes |
+| DELETE | `/api/items/{id}/` | Delete item | Yes |
+| GET | `/api/items/{id}/history/` | Get stock adjustment history | Yes |
+ 
+## Local Setup
+ 
 ### Prerequisites
-
 - Python 3.8 or higher
-- pip (Python package manager)
+- pip
 - Git
-
-### Step 1: Clone the Repository
-
+ 
+### Steps
+ 
 ```bash
+# 1. Clone the repository
 git clone <your-repo-url>
-cd django-todo-backend
-```
-
-### Step 2: Create Virtual Environment
-
-**Windows:**
-```bash
+cd django-backend
+ 
+# 2. Create virtual environment
 python -m venv venv
-.\venv\Scripts\activate
-```
-
-**macOS/Linux:**
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
-### Step 3: Install Dependencies
-
-```bash
+source venv/bin/activate  # On Windows: .\venv\Scripts\activate
+ 
+# 3. Install dependencies
 pip install -r requirements.txt
+ 
+# 4. Set up environment variables
+# Create a .env file in the project root:
 ```
-
-### Step 4: Set Up Environment Variables
-
-Create a `.env` file in the `django-todo-backend` directory:
-
+ 
 ```env
 DEBUG=True
 SECRET_KEY=your-secret-key-here
 FRONTEND_URL=http://localhost:3000
 DEFAULT_PROFILE_IMAGE_URL=https://via.placeholder.com/150
-
-# Optional - for password reset emails
-SENDGRID_API_KEY=your-sendgrid-api-key
-DEFAULT_FROM_EMAIL=your-email@example.com
-
-# Optional - for profile image uploads
-VITE_CLOUDINARY_CLOUD_NAME=your-cloudinary-name
-VITE_CLOUDINARY_UPLOAD_PRESET=your-upload-preset
+SENDGRID_API_KEY=your-sendgrid-key          # Optional for local dev
+DEFAULT_FROM_EMAIL=your-verified@email.com   # Optional for local dev
 ```
-
-> **Note:** For local development, you don't need SendGrid or Cloudinary. The app will work without them, but password reset and profile image upload won't function.
-
-### Step 5: Run Migrations
-
+ 
 ```bash
+# 5. Run migrations
 python manage.py migrate
-```
-
-This creates the SQLite database and all necessary tables.
-
-### Step 6: Create a Superuser (Optional)
-
-```bash
+ 
+# 6. Create a superuser (optional, for admin access)
 python manage.py createsuperuser
-```
-
-Follow the prompts to create an admin account. You can then access the Django admin at `http://localhost:8000/admin/`
-
-### Step 7: Run the Development Server
-
-```bash
+ 
+# 7. Start the development server
 python manage.py runserver
 ```
-
+ 
 The API will be available at:
-- **API Base:** http://localhost:8000/api/
-- **Admin Panel:** http://localhost:8000/admin/
-- **API Docs (Swagger):** http://localhost:8000/api/docs/
-
-You can now test all endpoints using the Swagger UI at http://localhost:8000/api/docs/
-
-## 📡 API Endpoints
-
-### Authentication
-
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/api/auth/register/` | Register new user | No |
-| POST | `/api/auth/token/` | Login (get JWT tokens) | No |
-| POST | `/api/auth/token/refresh/` | Refresh access token | No |
-| POST | `/api/auth/password-reset/` | Request password reset | No |
-| POST | `/api/auth/password-reset-confirm/` | Confirm password reset | No |
-| GET | `/api/auth/profile/` | Get user profile | Yes |
-| PATCH | `/api/auth/profile/` | Update user profile | Yes |
-
-### Todos
-
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| GET | `/api/todos/` | List all user's todos | Yes |
-| POST | `/api/todos/` | Create new todo | Yes |
-| GET | `/api/todos/{id}/` | Get specific todo | Yes |
-| PUT | `/api/todos/{id}/` | Update todo | Yes |
-| PATCH | `/api/todos/{id}/` | Partially update todo | Yes |
-| DELETE | `/api/todos/{id}/` | Delete todo | Yes |
-
-### Documentation
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/docs/` | Swagger UI |
-| GET | `/api/schema/` | OpenAPI schema |
-
-## 🗄️ Database
-
-### Local Development
-- Uses **SQLite** (`db.sqlite3`)
-- No setup required
-- File-based, perfect for development
-
-### Production (Render)
-- Uses **PostgreSQL**
-- Configured via `DATABASE_URL` environment variable
-- Automatically provisioned by Render
-
-### Resetting Local Database
-
-If you need to start fresh:
-
+- API: http://localhost:8000/api/
+- Admin: http://localhost:8000/admin/
+- Swagger: http://localhost:8000/api/docs/
+ 
+## Testing
+ 
+The project includes test suites for both the inventory and authentication apps.
+ 
 ```bash
-# Delete database
-rm db.sqlite3
-
-# Run migrations
-python manage.py migrate
-
-# Create superuser
-python manage.py createsuperuser
+# Run all tests
+python manage.py test
+ 
+# Run only inventory tests
+python manage.py test todo
+ 
+# Run only authentication tests
+python manage.py test authentication
+ 
+# Run with verbosity
+python manage.py test -v 2
 ```
-
-## 🧪 Testing
-
-### Using Swagger UI
-
-1. Start the server: `python manage.py runserver`
-2. Visit http://localhost:8000/api/docs/ for interactive API testing
-3. Use the "Try it out" button on any endpoint to test it directly in your browser
-4. For authenticated endpoints, click "Authorize" and enter your JWT token
-
-### Django Shell
-
-For direct database queries:
-
-```bash
-python manage.py shell
-```
-
-```python
-# Inside shell
-from django.contrib.auth.models import User
-from todo.models import Todo
-
-# Get all users
-User.objects.all()
-
-# Get all todos
-Todo.objects.all()
-
-# Create a todo
-user = User.objects.first()
-Todo.objects.create(user=user, name="Test todo", completed=False)
-```
-
-## 🌐 Deployment (Render)
-
-This project is deployed on Render. Here's how it's configured:
-
+ 
+### Test Coverage
+ 
+**Inventory tests** cover:
+- Model behaviour (low stock calculation, defaults, timestamps)
+- Full CRUD via API
+- Server-side validation (negative values rejected)
+- User data isolation (users only see their own items)
+- Authentication enforcement
+- Stock adjustment audit log creation
+- Audit log reason categorisation (increase/decrease/edit/created)
+- History endpoint access control
+ 
+**Authentication tests** cover:
+- Registration (success, duplicates, weak passwords, missing fields)
+- Login and token refresh
+- Profile retrieval and updates
+- Password reset token lifecycle
+- Security measures (non-existent email returns 200)
+ 
+## Deployment (Render)
+ 
+The backend is deployed as a Web Service on Render.
+ 
 ### Environment Variables on Render
-
+ 
 ```
 DEBUG=False
 SECRET_KEY=<production-secret-key>
-DATABASE_URL=<postgres-connection-string>
-FRONTEND_URL=https://your-frontend.onrender.com
+DATABASE_URL=<internal-postgres-url>
+FRONTEND_URL=https://inventory-frontend-i2y1.onrender.com
 SENDGRID_API_KEY=<your-sendgrid-key>
-DEFAULT_FROM_EMAIL=<your-email>
-DEFAULT_PROFILE_IMAGE_URL=<cloudinary-url>
+DEFAULT_FROM_EMAIL=<your-verified-email>
+DEFAULT_PROFILE_IMAGE_URL=https://via.placeholder.com/150
 ```
+ 
+### Build & Start Commands
+ 
+- **Build:** `pip install -r requirements.txt && python manage.py migrate`
+- **Start:** `gunicorn backend.wsgi:application`
+ 
+## Key Technical Decisions
+ 
+- **ModelViewSet** was used for inventory items to keep the code concise while still providing full CRUD — the router auto-generates all URL patterns.
+- **Stock audit log** is handled at the view layer (in `perform_create` and `perform_update`) rather than using Django signals, because it gives more control over the reason categorisation and keeps the logic visible in one place.
+- **User isolation** is enforced by filtering the queryset in `get_queryset()`, which means all ViewSet actions (list, retrieve, update, delete) automatically respect user boundaries.
+- **Password reset** returns 200 even for non-existent emails to prevent email enumeration attacks.
+- **SQLite** is used locally for simplicity, with **PostgreSQL** in production via `dj-database-url` — the switch is handled entirely through the `DATABASE_URL` environment variable.
+ 
+## Use of AI
 
-### Build Command
-
-```bash
-pip install -r requirements.txt && python manage.py migrate
-```
-
-### Start Command
-
-```bash
-gunicorn backend.wsgi:application
-```
-
-## 📝 Common Issues & Solutions
-
-### Issue: "No module named 'module_name'"
-**Solution:** Make sure virtual environment is activated and dependencies are installed
-```bash
-pip install -r requirements.txt
-```
-
-### Issue: "Database table doesn't exist"
-**Solution:** Run migrations
-```bash
-python manage.py migrate
-```
-
-### Issue: "CORS error in browser"
-**Solution:** Check `CORS_ALLOWED_ORIGINS` in `settings.py` includes your frontend URL
-
-### Issue: "401 Unauthorized on protected endpoints"
-**Solution:** Make sure you're including the JWT token in the Authorization header
-
-### Issue: Render site taking forever to load
-**Solution:** Free tier spins down after inactivity. Wait ~1 minute for first request.
-
-## 📚 Learning Resources
-
-- [Django Documentation](https://docs.djangoproject.com/)
-- [Django REST Framework](https://www.django-rest-framework.org/)
-- [JWT Authentication](https://django-rest-framework-simplejwt.readthedocs.io/)
-- [Render Deployment Guide](https://render.com/docs/deploy-django)
-
-## 🤝 For Students
-
-This project demonstrates:
-- ✅ RESTful API design
-- ✅ JWT authentication implementation
-- ✅ CRUD operations
-- ✅ Database migrations
-- ✅ Environment configuration
-- ✅ API documentation
-- ✅ Deployment to production
-
-**What you can learn:**
-1. How to structure a Django REST API
-2. How to implement secure authentication
-3. How to create CRUD endpoints
-4. How to deploy to a cloud platform
-5. How to document your API
-
-
-## 📄 License
-
-This is a student learning project. Feel free to use it as a reference for your own projects.
-
-## 🐛 Known Issues
-
-- Password reset requires SendGrid configuration
-- Profile image upload requires Cloudinary setup
-- Free Render tier has cold start delays (~1 min)
-- SQLite used for local dev, PostgreSQL for production (different behaviors possible)
-
----
-
-**Happy Coding! 🚀**
+AI tools were used for research and debugging assistance during development.
